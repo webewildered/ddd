@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "target": "es2017",
+        "module": "esnext",
+        "sourceMap": true,
+        "inlineSources": false,
+        "sourceRoot": "../src",
+        "strict": true,
+    },
+    "include": ["src/**/*"]
+}
