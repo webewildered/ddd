@@ -1,4 +1,5 @@
 import {Card, Deck, DrawResult, Genus} from './deck.js';
+import {GDriveAppData} from './drive.js';
 
 // Fit text in an element by adjusting font size
 export function setTextAndFit(
@@ -61,6 +62,26 @@ function draw(): void
 document.getElementById('btn-der')?.addEventListener('click', () => chooseAnswer('m'));
 document.getElementById('btn-die')?.addEventListener('click', () => chooseAnswer('f'));
 document.getElementById('btn-das')?.addEventListener('click', () => chooseAnswer('n'));
+
+let drive = new GDriveAppData();
+drive.init()
+.then(() => console.log('GDriveAppData initialized'))
+.catch((error) =>
+{
+    console.error('Error initializing GDriveAppData: ', error);
+});
+
+document.getElementById('btn-login')?.addEventListener('click', () =>
+{
+    drive.signIn()
+    .then(() => drive.load())
+    .then(data =>
+    {
+        console.log('loaded ' + data);
+        return drive.save(data + 'abc\n');
+    })
+    .then(() => console.log('saved'));
+});
 
 function chooseAnswer(answer: Genus): void
 {
