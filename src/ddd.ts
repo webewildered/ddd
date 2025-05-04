@@ -1,8 +1,20 @@
 import {Card, Deck, DrawResult, Genus} from './deck.js';
 import {GDriveAppData} from './drive.js';
 
+const LOCAL_STORAGE_KEY = 'ddd';
+
+function gapiLoaded()
+{
+    console.log('gapi loaded');
+}
+
+function gsiLoaded()
+{
+    console.log('gsi loaded');
+}
+
 // Fit text in an element by adjusting font size
-export function setTextAndFit(
+function setTextAndFit(
     el: HTMLElement,
     text: string,
     minSize = 10,
@@ -39,52 +51,69 @@ export function setTextAndFit(
     el.style.fontSize = `${best}rem`;
 }
 
-let genusText = '';
 let deck: Deck;
-let question: DrawResult;
+let question: DrawResult | null = null;
+let drive: GDriveAppData = new GDriveAppData();
+let genus: string | null = null;
 
 // Initialize the application
-async function init(): Promise<void>
+function init()
 {
-    genusText = await fetch('genus.txt').then(res => res.text());
-    const stored = localStorage.getItem('ddd') || JSON.stringify({ cards: [] });
-    deck = new Deck(genusText, stored);
-    draw();
+    // Load the app data
+    fetch('genus.txt')
+    .then(res => res.text())
+    .then(genusText =>
+    {
+        genus = genusText;
+        begin();
+    })
+    .catch(error => console.error('Error loading genus: ', error));
+
+    drive.init()
+    .then(() => console.log('GDriveAppData initialized'))
+    .catch(error => console.error('Error initializing GDriveAppData: ', error));
+}
+
+function begin(): void
+{
+    if (genus)
+    {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
+        deck = new Deck(genus, stored);
+        draw();
+    }
 }
 
 function draw(): void
 {
     question = deck.draw();
-    const wordEl = document.getElementById('word');
-    if (wordEl) setTextAndFit(wordEl, question.card.word, 1, 4);
+    setTextAndFit(document.getElementById('word')!, question.card.word, 1, 4);
 }
 
 document.getElementById('btn-der')?.addEventListener('click', () => chooseAnswer('m'));
 document.getElementById('btn-die')?.addEventListener('click', () => chooseAnswer('f'));
 document.getElementById('btn-das')?.addEventListener('click', () => chooseAnswer('n'));
 
-let drive = new GDriveAppData();
-drive.init()
-.then(() => console.log('GDriveAppData initialized'))
-.catch((error) =>
-{
-    console.error('Error initializing GDriveAppData: ', error);
-});
-
 document.getElementById('btn-login')?.addEventListener('click', () =>
 {
+    const button = document.getElementById('btn-login') as HTMLButtonElement;
+    button.disabled = true;
+
     drive.signIn()
     .then(() => drive.load())
     .then(data =>
     {
-        console.log('loaded ' + data);
-        return drive.save(data + 'abc\n');
+        localStorage.setItem(LOCAL_STORAGE_KEY, data);
+        begin();
+        button.style.visibility = "hidden";
     })
-    .then(() => console.log('saved'));
+    .catch(error => console.error('Error signing in or loading data: ', error))
 });
 
 function chooseAnswer(answer: Genus): void
 {
+    if (!question) return;
+
     let text: string;
     switch (question.answer)
     {
@@ -96,13 +125,21 @@ function chooseAnswer(answer: Genus): void
     {
         text = '✔️ ' + text;
         deck.answer(question.card as Card, true);
-    } else
+    }
+    else
     {
         text = '❌ ' + text;
         deck.answer(question.card as Card, false);
     }
 
-    localStorage.setItem('ddd', deck.save());
+    const userData = deck.save();
+    localStorage.setItem(LOCAL_STORAGE_KEY, userData);
+    if (drive.isSignedIn())
+    {
+        drive.save(userData)
+        .catch(error => console.error('Error saving data to Google Drive: ', error));
+    }
+
     const resultEl = document.getElementById('result');
     if (resultEl) resultEl.textContent = text;
 
@@ -111,6 +148,9 @@ function chooseAnswer(answer: Genus): void
         if (resultEl) resultEl.textContent = '';
         draw();
     }, 1000);
+
+    // Disable the buttons until the next question
+    question = null;
 }
 
 // Start the app on load

@@ -6,10 +6,26 @@ const FILENAME = 'ddd.txt';
 
 export class GDriveAppData
 {
+    private tokenClient: google.accounts.oauth2.TokenClient;
     private accessToken: string | null = null;
+    private tokenCallback: ((tokenResponse: google.accounts.oauth2.TokenResponse) => void) | null = null;
 
     constructor()
     {
+        this.tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: tokenResponse => this.onTokenResponse(tokenResponse)
+        });
+    }
+
+    onTokenResponse(tokenResponse: google.accounts.oauth2.TokenResponse): void
+    {
+        if (this.tokenCallback !== null)
+        {
+            this.tokenCallback(tokenResponse);
+            this.tokenCallback = null;
+        }
     }
 
     init(): Promise<void>
@@ -31,26 +47,32 @@ export class GDriveAppData
 
     signIn(): Promise<void>
     {
+        if (this.tokenCallback !== null)
+        {
+            return Promise.reject(new Error('Login already in progress'));
+        }
         return new Promise((resolve, reject) =>
         {
-            const tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (tokenResponse) =>
+            this.tokenCallback = tokenResponse =>
+            {
+                if (tokenResponse.error)
                 {
-                    if (tokenResponse.error)
-                    {
-                        reject(new Error(`Error signing in: ${tokenResponse.error}\n${tokenResponse.error_description}`));
-                    }
-                    else
-                    {
-                        this.accessToken = tokenResponse.access_token;
-                        resolve();
-                    }
-                },
-            });
-            tokenClient.requestAccessToken();
+                    reject(new Error(`Error signing in: ${tokenResponse.error}\n${tokenResponse.error_description}`));
+                }
+                else
+                {
+                    console.log('valid for: ' + tokenResponse.expires_in);
+                    this.accessToken = tokenResponse.access_token;
+                    resolve();
+                }
+            };
+            this.tokenClient.requestAccessToken({prompt: 'none'});
         });
+    }
+
+    isSignedIn(): boolean
+    {
+        return this.accessToken !== null;
     }
 
     save(content: string): Promise<any>
@@ -135,14 +157,14 @@ export class GDriveAppData
 
                 // Download the file
                 return gapi.client.drive.files.get(
-                    {
-                        fileId,
-                        alt: 'media'
-                    }).then(resp =>
-                    {
-                        console.log(JSON.stringify(resp));
-                        return resp.body as string
-                    });
+                {
+                    fileId,
+                    alt: 'media'
+                })
+                .then(resp =>
+                {
+                    return resp.body as string
+                });
             });
     }
 }

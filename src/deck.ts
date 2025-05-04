@@ -127,17 +127,25 @@ export class Deck
     private drawDate = new Date();
     private removedWords = new Set<string>();
 
-    constructor(coreData: string, userData?: string)
+    constructor(coreData: string, userData: string | null)
     {
         // Load stored cards
         const seen = new Set<string>();
-        if (userData)
+        if (userData != null && userData.length > 0)
         {
-            const obj: UserData = JSON.parse(userData);
-            for (const sc of obj.cards)
+            try
             {
-                seen.add(sc.word);
-                this.cards.push({ word: sc.word, date: new Date(sc.date), level: sc.level });
+                const obj: UserData = JSON.parse(userData);
+                for (const sc of obj.cards)
+                {
+                    seen.add(sc.word);
+                    this.cards.push({ word: sc.word, date: new Date(sc.date), level: sc.level });
+                }
+                console.log('Loaded ' + this.cards.length + ' cards from user data');
+            }
+            catch (e)
+            {
+                console.error('Error parsing user data: ', e);
             }
         }
 
