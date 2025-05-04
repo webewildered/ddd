@@ -23,10 +23,8 @@ Haus n
 Platz m
 Million f
 Arbeit f
-Teil n
 Bild n
 Welt f
-Foto n
 Minute f
 Weg m
 Monat m
@@ -95,7 +93,6 @@ Montag m
 Idee f
 Film m
 Zukunft f
-Tor n
 Dezember m
 Meter m
 Anfang m
@@ -156,7 +153,6 @@ Lösung f
 Regierung f
 Farbe f
 Wahl f
-Mark f
 Angabe f
 Titel m
 Betrieb m
@@ -199,7 +195,6 @@ Ausstellung f
 Sicherheit f
 Vater m
 Weise f
-Band n
 Hinweis m
 Video n
 Vorteil m
@@ -332,7 +327,6 @@ Essen n
 Hälfte f
 Feuerwehr f
 Zusammenhang m
-Bund m
 Fuß m
 Kritik f
 Tochter f
@@ -389,7 +383,6 @@ Kauf m
 Voraussetzung f
 Anwendung f
 Herbst m
-Leiter m
 Grundlage f
 Treffen n
 Aussage f
@@ -480,7 +473,6 @@ Motto n
 Verkauf m
 Richter m
 Umgebung f
-See m
 Verhältnis n
 Hamburger m
 Verantwortung f
@@ -565,7 +557,6 @@ Arbeitgeber m
 Heimat f
 Strom m
 Vereinbarung f
-Maß n
 Kaffee m
 Bundesregierung f
 Spur f
@@ -699,7 +690,6 @@ Fazit n
 Treffer m
 Option f
 Pflege f
-Steuer n
 Drittel n
 Meer n
 Wechsel m
@@ -1430,7 +1420,6 @@ Zuhörer m
 Leiterin f
 CD f
 Status m
-Erbe n
 Impuls m
 Abfahrt f
 Vermögen n
@@ -1455,7 +1444,6 @@ Landratsamt n
 Trick m
 Stuhl m
 Code m
-Gehalt m
 Duft m
 Tal n
 Pkw m
@@ -1527,7 +1515,6 @@ Zelle f
 Maus f
 Blüte f
 Überlegung f
-Schild m
 Stahl m
 Wartezeit f
 Augenblick m
@@ -2421,7 +2408,6 @@ Ordner m
 Insekt n
 Kontrast m
 Tankstelle f
-Plastik f
 Tageszeitung f
 Transaktion f
 Tenor m
@@ -2659,7 +2645,6 @@ Standpunkt m
 Paradies n
 Buchhandlung f
 Zeitplan m
-Flur m
 Wiederholung f
 Toleranz f
 Folie f
@@ -2722,7 +2707,6 @@ Wohlbefinden n
 Urlauber m
 Volksbank f
 Erfindung f
-Kiefer f
 Europameisterschaft f
 Onkel m
 Pfad m
@@ -5835,7 +5819,6 @@ Schirmherr m
 Rüstung f
 Steuerhinterziehung f
 Verkehrssicherheit f
-Laster n
 BVerfG n
 Generalprobe f
 Betreff m
