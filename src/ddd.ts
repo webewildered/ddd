@@ -5,7 +5,8 @@ const LOCAL_STORAGE_KEY = 'ddd';
 
 function log(text: string)
 {
-    document.getElementById('log')!.textContent += text + '\n';
+    console.log(text);
+    //document.getElementById('log')!.textContent += text + '\n';
 }
 
 // Fit text in an element by adjusting font size
