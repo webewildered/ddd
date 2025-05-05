@@ -18,5 +18,14 @@
             "trace": true, // Optional: Helps debug source map issues
             "preLaunchTask": "tsc: build - tsconfig.json",
         },
+        {
+            "name": "deploy",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["tsx", "deploy.ts"],
+            "cwd": "${workspaceFolder}",
+            "skipFiles": ["<node_internals>/**"]
+        }
     ]
 }

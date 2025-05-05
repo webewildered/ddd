@@ -3,14 +3,9 @@ import {GDriveAppData} from './drive.js';
 
 const LOCAL_STORAGE_KEY = 'ddd';
 
-function gapiLoaded()
+function log(text: string)
 {
-    console.log('gapi loaded');
-}
-
-function gsiLoaded()
-{
-    console.log('gsi loaded');
+    document.getElementById('log')!.textContent += text + '\n';
 }
 
 // Fit text in an element by adjusting font size
@@ -70,7 +65,10 @@ function init()
     .catch(error => console.error('Error loading genus: ', error));
 
     drive.init()
-    .then(() => console.log('GDriveAppData initialized'))
+    .then(() => 
+    {
+        log('GDriveAppData initialized')
+    })
     .catch(error => console.error('Error initializing GDriveAppData: ', error));
 }
 
@@ -99,15 +97,25 @@ document.getElementById('btn-login')?.addEventListener('click', () =>
     const button = document.getElementById('btn-login') as HTMLButtonElement;
     button.disabled = true;
 
-    drive.signIn()
-    .then(() => drive.load())
-    .then(data =>
+    drive.signIn((error) =>
     {
-        localStorage.setItem(LOCAL_STORAGE_KEY, data);
-        begin();
-        button.style.visibility = "hidden";
-    })
-    .catch(error => console.error('Error signing in or loading data: ', error))
+        if (error)
+        {
+            log('Sign in error: ' + error.message);
+        }
+        else
+        {
+            drive.load()
+            .then(data =>
+            {
+                log('Loaded');
+                localStorage.setItem(LOCAL_STORAGE_KEY, data);
+                begin();
+                button.style.visibility = "hidden";
+            })
+            .catch(error => console.error('Error loading data: ', error));
+        }
+    });
 });
 
 function chooseAnswer(answer: Genus): void

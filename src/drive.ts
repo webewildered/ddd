@@ -4,27 +4,31 @@ const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/res
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 const FILENAME = 'ddd.txt';
 
+type SignInCallback = (error: Error | null) => void;
+
 export class GDriveAppData
 {
     private tokenClient: google.accounts.oauth2.TokenClient;
     private accessToken: string | null = null;
-    private tokenCallback: ((tokenResponse: google.accounts.oauth2.TokenResponse) => void) | null = null;
+    private signInCallback: SignInCallback | null = null;
 
     constructor()
     {
         this.tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
             scope: SCOPES,
-            callback: tokenResponse => this.onTokenResponse(tokenResponse)
+            callback: tokenResponse => this.onTokenResponse(tokenResponse.access_token, tokenResponse.error),
+            error_callback: error => this.onTokenResponse(null, error.message),
         });
     }
 
-    onTokenResponse(tokenResponse: google.accounts.oauth2.TokenResponse): void
+    onTokenResponse(accessToken: string | null, error: string | null): void
     {
-        if (this.tokenCallback !== null)
+        if (this.signInCallback !== null)
         {
-            this.tokenCallback(tokenResponse);
-            this.tokenCallback = null;
+            this.accessToken = accessToken;
+            this.signInCallback(null);
+            this.signInCallback = null;
         }
     }
 
@@ -45,29 +49,17 @@ export class GDriveAppData
         });
     }
 
-    signIn(): Promise<void>
+    signIn(signInCallback:SignInCallback)
     {
-        if (this.tokenCallback !== null)
+        if (this.signInCallback !== null)
         {
-            return Promise.reject(new Error('Login already in progress'));
+            signInCallback(new Error('Login already in progress'));
         }
-        return new Promise((resolve, reject) =>
+        else
         {
-            this.tokenCallback = tokenResponse =>
-            {
-                if (tokenResponse.error)
-                {
-                    reject(new Error(`Error signing in: ${tokenResponse.error}\n${tokenResponse.error_description}`));
-                }
-                else
-                {
-                    console.log('valid for: ' + tokenResponse.expires_in);
-                    this.accessToken = tokenResponse.access_token;
-                    resolve();
-                }
-            };
-            this.tokenClient.requestAccessToken({prompt: 'none'});
-        });
+            this.signInCallback = signInCallback;
+            this.tokenClient.requestAccessToken({prompt: ''});
+        }
     }
 
     isSignedIn(): boolean
@@ -98,7 +90,6 @@ export class GDriveAppData
 
                 if (files.length === 0)
                 {
-                    console.log('creating new');
                     // Create new
                     return gapi.client.drive.files.create(
                         {
@@ -117,7 +108,6 @@ export class GDriveAppData
                     throw new Error('File ID is undefined');
                 }
 
-                console.log('updating ' + fileId);
                 return gapi.client.request(
                 {
                     path: `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
@@ -145,13 +135,11 @@ export class GDriveAppData
                 const files = listRes.result.files || [];
                 if (files.length === 0)
                 {
-                    console.log('doesnt exist');
                     return '';
                 }
                 const fileId = files[0].id;
                 if (fileId === undefined)
                 {
-                    console.log('id undefined');
                     return '';
                 }
 
