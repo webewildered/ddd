@@ -138,7 +138,7 @@ Rolle f
 Partei f
 Schritt m
 Gespräch n
-Namen m
+Name m
 Schüler m
 Sieg m
 Besucher m
@@ -356,7 +356,6 @@ Herausforderung f
 Gebiet n
 Linie f
 Position f
-Name m
 Winter m
 Wald m
 Marke f
