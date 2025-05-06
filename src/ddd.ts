@@ -44,6 +44,7 @@ function setTextAndFit(
         }
     }
 
+    console.log('fit: ' + best);
     el.style.fontSize = `${best}rem`;
 }
 
