@@ -400,7 +400,7 @@ Vertreter m
 Krankenhaus n
 Halle f
 Kategorie f
-Schluß m
+Schluss m
 Wettbewerb m
 Anteil m
 Anzahl f
@@ -3066,7 +3066,7 @@ Nährstoff m
 Brandenburger m
 Meilenstein m
 Dekoration f
-Riß f
+Riss f
 Physik f
 Gesichtspunkt m
 Mehrwertsteuer f
