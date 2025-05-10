@@ -5,7 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>der die das</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <script src="https://accounts.google.com/gsi/client"></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <script type="module" src="./ddd.js"></script>
@@ -14,7 +15,7 @@
 <body>
   
   <div id="splash" class="page" style="display: none">
-    <div style="font-size: 3rem;margin-bottom: 1rem">Der, die, das?</div>
+    <div class="header">Der, die, das?</div>
     <div id="g_id_onload"
       data-client_id="1061908190627-rvg57uk4euv27b8hovka4i1ph56o5onu.apps.googleusercontent.com"
       data-login_uri="https://der-die-das.pages.dev"
@@ -35,9 +36,19 @@
       <button id="btn-das">das</button>
     </div>
 
-    <div style="position:absolute;top:1rem;right:1rem">
-      <button id="btn-login">Login</button>
+    <div id="hamburger-menu">
+      <div><button id="btn-hamburger"><i id="hamburgerIcon" class="material-icons">menu</i></button></div>
+      <div class="hamburger-item"><button id="btn-stats">Stats</button></div>
+      <div class="hamburger-item"><button id="btn-login">Login</button></div>
     </div>
+  </div>
+  
+  <div id="stats" class="page" style="display: none">
+    <div class="header">Statistiken</div>
+    <div class="stat">Wörter gesehen: <span id="stat-numWords"></span> / <span id="stat-totalWords"></span></div>
+    <div class="stat" id="statGroup-session">Session: <span id="stat-numCorrect"></span> / <span id="stat-numAnswers"></span> (<span id="stat-accuracy"></span>%)</div>
+    <div class="stat" id="statGroup-speed">Geschwindigkeit: <span id="stat-speed"></span> sekunde</div>
+    <div><button class="splashButton" id="btn-statsOk" style="margin-top: 1rem">Schließen</button></div>
   </div>
 
   <div id="log"></div>

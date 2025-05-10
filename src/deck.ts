@@ -165,6 +165,9 @@ export class Deck
         this.removedWords = seen;
     }
 
+    getNumCards() { return this.cards.length; }
+    getNumWords() { return this.newWords.length + this.cards.length; }
+
     save(): string
     {
         const stored = this.cards.map(c => ({ word: c.word, date: c.date.toISOString(), level: c.level }));

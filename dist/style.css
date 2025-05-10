@@ -47,6 +47,10 @@ body {
     resize: none;
 }
 
+.stat {
+    font-size: 2rem;
+}
+
 .splashButton {
     padding: 1rem;
     margin: 0.5rem;
@@ -72,6 +76,43 @@ body {
 #btn-skipLogin {
     background-color: #E91E63;
     color: #fff;
+}
+
+.header {
+     font-size: 3rem;
+     margin-bottom: 1rem;
+}
+
+#hamburger-menu {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    align-items: right;
+}
+
+#hamburger-menu button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+}
+
+#hamburgerIcon {
+    font-size: 3rem;
+}
+
+.hamburger-item {
+    float: right;
+    font-size: 1.5rem;
+    display: none;
+}
+
+#btn-hamburger {
+    float: right;
+    font-size: 2rem;
 }
 
 /* Button container */
