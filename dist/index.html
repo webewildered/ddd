@@ -12,23 +12,35 @@
 </head>
 
 <body>
-
-  <div id="result"></div>
-
-  <div id="word"></div>
-
-  <div class="button-container">
-    <button id="btn-der">der</button>
-    <button id="btn-die">die</button>
-    <button id="btn-das">das</button>
-  </div>
   
-  <div id="log">
+  <div id="splash" class="page" style="display: none">
+    <div style="font-size: 3rem;margin-bottom: 1rem">Der, die, das?</div>
+    <div id="g_id_onload"
+      data-client_id="1061908190627-rvg57uk4euv27b8hovka4i1ph56o5onu.apps.googleusercontent.com"
+      data-login_uri="https://der-die-das.pages.dev"
+      data-auto_prompt="false">
+    </div>
+    <button class="splashButton" id="btn-splashLogin">Über Google anmelden</button>
+    <button class="splashButton" id="btn-skipLogin">Ohne Anmeldung spielen</button>
   </div>
 
-  <div style="position:absolute;top:1rem;right:1rem">
-    <button id="btn-login">Login</button>
+  <div id="game" class="page" style="display: none">
+    <div id="result"></div>
+
+    <div id="word"></div>
+
+    <div class="button-container">
+      <button id="btn-der">der</button>
+      <button id="btn-die">die</button>
+      <button id="btn-das">das</button>
+    </div>
+
+    <div style="position:absolute;top:1rem;right:1rem">
+      <button id="btn-login">Login</button>
+    </div>
   </div>
+
+  <div id="log"></div>
 
 </body>
 

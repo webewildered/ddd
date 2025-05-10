@@ -3,6 +3,9 @@ import {GDriveAppData} from './drive.js';
 
 const LOCAL_STORAGE_KEY = 'ddd';
 
+const gamePage = document.getElementById('game')!;
+const splashPage = document.getElementById('splash')!;
+
 function log(text: string)
 {
     console.log(text);
@@ -53,35 +56,76 @@ let question: DrawResult | null = null;
 let drive: GDriveAppData = new GDriveAppData();
 let genus: string | null = null;
 
+function hideElement(page: HTMLElement)
+{
+    page.style.display = 'none';
+}
+
+function showElement(page: HTMLElement)
+{
+    page.style.display = 'flex';
+}
+
+function showSplash()
+{
+    hideElement(gamePage);
+    showElement(splashPage);
+}
+
+function showGame()
+{
+    hideElement(splashPage);
+    showElement(gamePage);
+}
+
 // Initialize the application
 function init()
 {
     // Load the app data
-    fetch('genus.txt')
+    const loadGenus = fetch('genus.txt')
     .then(res => res.text())
     .then(genusText =>
     {
+        log('Genus loaded');
         genus = genusText;
-        begin();
     })
     .catch(error => console.error('Error loading genus: ', error));
 
-    drive.init()
-    .then(() => 
-    {
-        log('GDriveAppData initialized')
-    })
+    // Load the Google Drive API
+    const loadDrive = drive.init()
+    .then(() => log('GDriveAppData initialized'))
     .catch(error => console.error('Error initializing GDriveAppData: ', error));
+
+    // After everything loads
+    Promise.all([loadGenus, loadDrive])
+    .then(() =>
+    {
+        log('All loaded');
+
+        if (drive.isSignedIn())
+        {
+            lateLoginButton.style.visibility = "hidden";
+            begin(); // User is already logged in
+        }
+        else if (drive.wasSignedIn())
+        {
+            // User logged in previously but the token expired. They probably want to log in.
+            showSplash();
+        }
+        else
+        {
+            // User never logged in, start the game and they can log in later if they want.
+            begin();
+        }
+    });
 }
 
 function begin(): void
 {
-    if (genus)
-    {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
-        deck = new Deck(genus, stored);
-        draw();
-    }
+    showGame();
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
+    deck = new Deck(genus!, stored);
+    draw();
 }
 
 function draw(): void
@@ -94,11 +138,10 @@ document.getElementById('btn-der')?.addEventListener('click', () => chooseAnswer
 document.getElementById('btn-die')?.addEventListener('click', () => chooseAnswer('f'));
 document.getElementById('btn-das')?.addEventListener('click', () => chooseAnswer('n'));
 
-document.getElementById('btn-login')?.addEventListener('click', () =>
+const splashLoginButton = document.getElementById('btn-splashLogin')!;
+const lateLoginButton = document.getElementById('btn-login')!;
+function onLogin()
 {
-    const button = document.getElementById('btn-login') as HTMLButtonElement;
-    button.disabled = true;
-
     drive.signIn((error) =>
     {
         if (error)
@@ -111,13 +154,24 @@ document.getElementById('btn-login')?.addEventListener('click', () =>
             .then(data =>
             {
                 log('Loaded');
-                localStorage.setItem(LOCAL_STORAGE_KEY, data);
-                begin();
-                button.style.visibility = "hidden";
+                if (data.length > 0)
+                {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, data);
+                    begin();
+                } // else, probably first login, so keep the local data
+                lateLoginButton.style.visibility = "hidden";
             })
-            .catch(error => console.error('Error loading data: ', error));
+            .catch(error => log('Error loading data: ' + error));
         }
     });
+}
+splashLoginButton.addEventListener('click', onLogin);
+lateLoginButton.addEventListener('click', onLogin);
+
+const skipLogin = document.getElementById('btn-skipLogin')!;
+skipLogin.addEventListener('click', (event: Event) =>
+{
+    begin();
 });
 
 function chooseAnswer(answer: Genus): void
