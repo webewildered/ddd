@@ -33,16 +33,20 @@ body {
     text-align: center;
     line-height: 1.2;
     resize: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Textarea styling */
 #word {
     width: 100%;
     max-width: 90%;
-    height: 6rem;
+    height: 5rem;
     font-size: 4rem;
     text-align: center;
-    line-height: 6rem;
+    line-height: 5rem;
     margin-bottom: 1rem;
     resize: none;
 }
@@ -108,6 +112,10 @@ body {
     float: right;
     font-size: 1.5rem;
     display: none;
+}
+
+.hamburger-item-button {
+    height: 2rem;
 }
 
 #btn-hamburger {

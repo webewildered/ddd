@@ -1,5 +1,5 @@
-import {Card, Deck, DrawResult, Genus} from './deck.js';
-import {GDriveAppData} from './drive.js';
+import { Card, Deck, DrawResult, Genus } from './deck.js';
+import { GDriveAppData } from './drive.js';
 
 const LOCAL_STORAGE_KEY = 'ddd';
 
@@ -33,32 +33,34 @@ function setTextAndFit(
 
     let low = minSize;
     let high = maxSize;
-    let best = minSize;
+    let test = high;
+    const res = 0.25;
 
-    while (low <= high)
+    while (low <= high - res)
     {
-        const mid = Math.floor((low + high) / 2);
-        el.style.fontSize = `${mid}rem`;
+        el.style.fontSize = `${test}rem`;
 
         const fitsWidth = el.scrollWidth <= el.clientWidth;
         const fitsHeight = el.scrollHeight <= el.clientHeight;
 
         if (fitsWidth && fitsHeight)
         {
-            best = mid;
-            low = mid + 1;
-        } else
-        {
-            high = mid - 1;
+            low = test;
         }
+        else
+        {
+            high = test;
+        }
+        test = (low + high) / 2;
     }
 
-    console.log('fit: ' + best);
-    el.style.fontSize = `${best}rem`;
+    console.log('fit: ' + low);
+    el.style.fontSize = `${low}rem`;
 }
 
 let deck: Deck;
 let question: DrawResult | null = null;
+let lastWord: string | null = null;
 let drive: GDriveAppData = new GDriveAppData();
 let genus: string | null = null;
 
@@ -92,41 +94,45 @@ function init()
 {
     // Load the app data
     const loadGenus = fetch('genus.txt')
-    .then(res => res.text())
-    .then(genusText =>
-    {
-        log('Genus loaded');
-        genus = genusText;
-    })
-    .catch(error => console.error('Error loading genus: ', error));
+        .then(res => res.text())
+        .then(genusText =>
+        {
+            log('Genus loaded');
+            genus = genusText;
+        })
+        .catch(error => console.error('Error loading genus: ', error));
 
     // Load the Google Drive API
     const loadDrive = drive.init()
-    .then(() => log('GDriveAppData initialized'))
-    .catch(error => console.error('Error initializing GDriveAppData: ', error));
+        .then(() => log('GDriveAppData initialized'))
+        .catch(error => console.error('Error initializing GDriveAppData: ', error));
 
     // After everything loads
     Promise.all([loadGenus, loadDrive])
-    .then(() =>
-    {
-        log('All loaded');
+        .then(() =>
+        {
+            log('All loaded');
 
-        if (drive.isSignedIn())
-        {
-            setLoggedIn(true);
-            begin(); // User is already logged in
-        }
-        else if (drive.wasSignedIn())
-        {
-            // User logged in previously but the token expired. They probably want to log in.
-            showPage(splashPage);
-        }
-        else
-        {
-            // User never logged in, start the game and they can log in later if they want.
-            begin();
-        }
-    });
+            if (drive.isSignedIn())
+            {
+                setLoggedIn(true);
+                begin(); // User is already logged in
+            }
+            else
+            {
+                setLoggedIn(false);
+                if (drive.wasSignedIn())
+                {
+                    // User logged in previously but the token expired. They probably want to log in.
+                    showPage(splashPage);
+                }
+                else
+                {
+                    // User never logged in, start the game and they can log in later if they want.
+                    begin();
+                }
+            }
+        });
 }
 
 function begin(): void
@@ -144,6 +150,7 @@ function begin(): void
 function draw(): void
 {
     question = deck.draw();
+    lastWord = question.card.word;
     setTextAndFit(document.getElementById('word')!, question.card.word, 1, 4);
 }
 
@@ -164,32 +171,46 @@ function onLogin()
         else
         {
             drive.load()
-            .then(data =>
-            {
-                log('Loaded');
-                if (data.length > 0)
+                .then(data =>
                 {
-                    localStorage.setItem(LOCAL_STORAGE_KEY, data);
-                    begin();
-                } // else, probably first login, so keep the local data
-                setLoggedIn(true);
-            })
-            .catch(error => log('Error loading data: ' + error));
+                    log('Loaded');
+                    if (data.length > 0)
+                    {
+                        localStorage.setItem(LOCAL_STORAGE_KEY, data);
+                        begin();
+                    } // else, probably first login, so keep the local data
+                    setLoggedIn(true);
+                })
+                .catch(error => log('Error loading data: ' + error));
         }
     });
 }
 splashLoginButton.addEventListener('click', onLogin);
-lateLoginButton.addEventListener('click', onLogin);
+lateLoginButton.addEventListener('click', () =>
+{
+    closeHamburger();
+    onLogin();
+});
+
+const logoutButton = document.getElementById('btn-logout')!;
+logoutButton.addEventListener('click', () =>
+{
+    closeHamburger();
+    drive.clearSignIn();
+    setLoggedIn(false);
+});
 
 function setLoggedIn(loggedIn: boolean)
 {
     if (loggedIn)
     {
-        lateLoginButton.style.visibility = "hidden";
+        lateLoginButton.style.display = "none";
+        logoutButton.style.display = "block";
     }
     else
     {
-        lateLoginButton.style.visibility = "visible";
+        lateLoginButton.style.display = "block";
+        logoutButton.style.display = "none";
     }
 }
 
@@ -210,7 +231,7 @@ statsButton.addEventListener('click', () =>
     showPage(statsPage);
     document.getElementById('stat-numWords')!.textContent = deck.getNumCards().toString();
     document.getElementById('stat-totalWords')!.textContent = deck.getNumWords().toString();
-    
+
     if (numAnswers === 0)
     {
         statGroupSession.style.display = 'none';
@@ -220,10 +241,10 @@ statsButton.addEventListener('click', () =>
     {
         statGroupSession.style.display = 'block';
         statGroupSpeed.style.display = 'block';
-        
+
         document.getElementById('stat-numCorrect')!.textContent = numCorrect.toString();
         document.getElementById('stat-numAnswers')!.textContent = numAnswers.toString();
-        
+
         let accuracy = 100 * numCorrect / numAnswers;
         let speed = (new Date().getTime() - beginTime.getTime()) / numAnswers / 1000;
         document.getElementById('stat-accuracy')!.textContent = accuracy.toFixed(0);
@@ -234,6 +255,13 @@ const statsOkButton = document.getElementById('btn-statsOk')!;
 statsOkButton.addEventListener('click', () =>
 {
     showPage(gamePage);
+});
+
+const dictButton = document.getElementById('btn-dict')!;
+dictButton.addEventListener('click', () =>
+{
+    location.href = 'https://de.wiktionary.org/wiki/' + (lastWord || '');
+    closeHamburger();
 });
 
 const hamburgerButton = document.getElementById('btn-hamburger')!;
@@ -272,45 +300,49 @@ hamburgerButton.addEventListener('click', () =>
 function chooseAnswer(answer: Genus): void
 {
     if (!question) return;
+    numAnswers++;
 
-    let text: string;
+    let article: string;
     switch (question.answer)
     {
-        case 'm': text = 'der'; break;
-        case 'f': text = 'die'; break;
-        case 'n': text = 'das'; break;
+        case 'm': article = 'der'; break;
+        case 'f': article = 'die'; break;
+        case 'n': article = 'das'; break;
     }
-    numAnswers++;
-    if (answer === question.answer)
+    const resultArticle = document.getElementById('resultArticle')!;
+    resultArticle.textContent = article;
+
+    const resultIcon = document.getElementById('resultIcon')!;
+    const correct = answer === question.answer;
+    if (correct)
     {
         numCorrect++;
-        text = '✔️ ' + text;
-        deck.answer(question.card as Card, true);
+        resultIcon.textContent = 'check';
+        resultIcon.style.color = 'green';
     }
     else
     {
-        text = '❌ ' + text;
-        deck.answer(question.card as Card, false);
+        resultIcon.textContent = 'close';
+        resultIcon.style.color = 'red';
     }
+    deck.answer(question.card as Card, correct);
 
     const userData = deck.save();
     localStorage.setItem(LOCAL_STORAGE_KEY, userData);
     if (drive.isSignedIn())
     {
         drive.save(userData)
-        .catch(error => console.error('Error saving data to Google Drive: ', error));
+            .catch(error => console.error('Error saving data to Google Drive: ', error));
     }
     else if (drive.wasSignedIn())
     {
         showPage(splashPage);
     }
 
-    const resultEl = document.getElementById('result');
-    if (resultEl) resultEl.textContent = text;
-
     setTimeout(() =>
     {
-        if (resultEl) resultEl.textContent = '';
+        resultIcon.textContent = '';
+        resultArticle.textContent = '';
         draw();
     }, 1000);
 
