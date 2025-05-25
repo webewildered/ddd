@@ -6,6 +6,9 @@ const LOCAL_STORAGE_KEY = 'ddd';
 const gamePage = document.getElementById('game')!;
 const statsPage = document.getElementById('stats')!;
 const splashPage = document.getElementById('splash')!;
+const definitionList = document.getElementById('definitionList')!;
+const definitionMessage = document.getElementById('definitionMessage')!;
+
 const pages = [gamePage, statsPage, splashPage];
 
 let numAnswers = 0;
@@ -28,7 +31,6 @@ function setTextAndFit(
 {
     el.textContent = text;
     el.style.whiteSpace = 'nowrap';
-    el.style.overflow = 'hidden';
     el.style.display = 'inline-block';
 
     let low = minSize;
@@ -149,6 +151,7 @@ function begin(): void
 
 function draw(): void
 {
+    clearDefinitions();
     question = deck.draw();
     lastWord = question.card.word;
     setTextAndFit(document.getElementById('word')!, question.card.word, 1, 4);
@@ -257,11 +260,107 @@ statsOkButton.addEventListener('click', () =>
     showPage(gamePage);
 });
 
+function clearDefinitions()
+{
+    definitionMessage.innerText = '';
+    while (definitionList.firstChild)
+    {
+        definitionList.removeChild(definitionList.firstChild);
+    }
+}
+
 const dictButton = document.getElementById('btn-dict')!;
 dictButton.addEventListener('click', () =>
 {
-    location.href = 'https://de.wiktionary.org/wiki/' + (lastWord || '');
+    clearDefinitions();
     closeHamburger();
+    if (!question)
+    {
+        return;
+    }
+
+    const word = question.card.word
+    const apiUrl = `https://de.wiktionary.org/w/api.php`;
+    const params = new URLSearchParams({
+        action: 'query',
+        format: 'json',
+        prop: 'revisions',
+        titles: word,
+        rvprop: 'content',
+        rvslots: 'main',
+        origin: '*' // Allows CORS
+    });
+    fetch(`${apiUrl}?${params}`)
+    .then(response =>
+    {
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        return response.json();
+    })
+    .then(data =>
+    {
+        const pages = data?.query?.pages;
+        const pageId = Object.keys(pages)[0];
+        const page = pages[pageId];
+        if (page?.revisions)
+        {
+            const content = page.revisions[0].slots.main['*'];
+            let inBedeutungen = false;
+            for (const line of content.split('\n'))
+            {
+                if (inBedeutungen)
+                {
+                    const re = /^:\[\d+\]\s*(.+)/;
+                    let matches = line.match(re);
+                    if (matches)
+                    {
+                        let text = matches[1].trim();
+
+                        // Convert '''bold''' to <b>...</b>
+                        text = text.replace(/'''(.*?)'''/g, '<b>$1</b>');
+
+                        // Convert ''italic'' to <i>...</i>
+                        text = text.replace(/''(.*?)''/g, '<i>$1</i>');
+
+                        // Remove links [[word|display]] -> display, [[word]] -> word
+                        text = text.replace(/\[\[([^|\]]*?\|)?([^\]]+?)\]\]/g, '$2');
+
+                        // Remove superscripts <sup>...</sup>
+                        text = text.replace(/<sup>.*?<\/sup>/g, '');
+
+                        // Remove templates {{template|param}} -> param or just remove entirely
+                        text = text.replace(/\{\{([^}]+)\}\}/g, (_: any, content: string) =>
+                        {
+                            // Split by | and keep the last param or first if single
+                            const parts = content.split('|');
+                            return parts.length > 1 ? parts.slice(-1)[0] : parts[0];
+                        });
+
+                        const li = document.createElement("li");
+                        li.innerHTML = text;
+                        definitionList.appendChild(li);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if (line === '{{Bedeutungen}}')
+                {
+                    inBedeutungen = true;
+                }
+            }
+
+            definitionMessage.innerHTML = `Quelle: <a href="https://de.wiktionary.org/wiki/${encodeURIComponent(word)}" target="_blank">Wiktionary</a>`;
+        }
+        else
+        {
+            throw new Error('Lookup failed');
+        }
+    })
+    .catch(error =>
+    {
+        definitionMessage.innerText = `Error fetching definitions: ${error.message}`;
+    });
 });
 
 const hamburgerButton = document.getElementById('btn-hamburger')!;

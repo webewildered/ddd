@@ -167,3 +167,7 @@ body {
     background-color: rgb(32, 233, 149);
     color: #fff;
 }
+
+#definitions {
+    margin: 1rem;
+}
