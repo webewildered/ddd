@@ -872,7 +872,6 @@ Gestaltung f
 Redaktion f
 Ticket n
 Baby n
-Mail f
 Salz n
 Aussicht f
 Betrag m
@@ -978,7 +977,6 @@ Vielzahl f
 Wanderung f
 Mischung f
 Gründung f
-Klein n
 Schuss m
 Auseinandersetzung f
 Aufstieg m
@@ -989,7 +987,6 @@ Unterricht m
 Fleisch n
 Vielfalt f
 Rückkehr f
-Fritz m
 Börse f
 Landwirtschaft f
 Radio n
