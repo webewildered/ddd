@@ -167,6 +167,19 @@ export class Deck
 
     getNumCards() { return this.cards.length; }
     getNumWords() { return this.newWords.length + this.cards.length; }
+    getLastUpdate() : Date
+    {
+        let lastUpdate: Date = new Date(0);
+        for (const card of this.cards)
+        {
+            if (card.date > lastUpdate)
+            {
+                lastUpdate = card.date;
+            }
+        }
+        return lastUpdate;
+    }
+
 
     save(): string
     {

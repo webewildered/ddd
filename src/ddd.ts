@@ -56,11 +56,10 @@ function setTextAndFit(
         test = (low + high) / 2;
     }
 
-    console.log('fit: ' + low);
     el.style.fontSize = `${low}rem`;
 }
 
-let deck: Deck;
+let deck: Deck | null = null;
 let question: DrawResult | null = null;
 let lastWord: string | null = null;
 let drive: GDriveAppData = new GDriveAppData();
@@ -117,8 +116,12 @@ function init()
 
             if (drive.isSignedIn())
             {
-                setLoggedIn(true);
-                begin(); // User is already logged in
+                // User is already logged in
+                loadDriveData().then(() =>
+                {
+                    setLoggedIn(true);
+                    begin();
+                });
             }
             else
             {
@@ -152,7 +155,7 @@ function begin(): void
 function draw(): void
 {
     clearDefinitions();
-    question = deck.draw();
+    question = deck!.draw();
     lastWord = question.card.word;
     setTextAndFit(document.getElementById('word')!, question.card.word, 1, 4);
 }
@@ -163,6 +166,33 @@ document.getElementById('btn-das')?.addEventListener('click', () => chooseAnswer
 
 const splashLoginButton = document.getElementById('btn-splashLogin')!;
 const lateLoginButton = document.getElementById('btn-login')!;
+function loadDriveData()
+{
+    return drive.load()
+    .then(data =>
+    {
+        log('Loaded data from drive');
+        // Only take the data from drive if it has more cards than the local data, or the same number of cards but a more recent date
+        if (data.length > 0)
+        {
+            let tempDeck = new Deck(genus!, data);
+            if (deck === null ||
+                tempDeck.getNumCards() >= deck.getNumCards() ||
+                (tempDeck.getNumCards() === deck.getNumCards() && tempDeck.getLastUpdate() > deck.getLastUpdate()))
+            {
+                log('Accepting ' + tempDeck.getNumCards() + ' from drive');
+                localStorage.setItem(LOCAL_STORAGE_KEY, data);
+                return true;
+            }
+            else if (deck !== null)
+            {
+                log('Keeping ' + deck.getNumCards() + ' from local');
+            }
+        }
+        return false;
+    })
+    .catch(error => log('Error loading data: ' + error));
+}
 function onLogin()
 {
     drive.signIn((error) =>
@@ -173,18 +203,14 @@ function onLogin()
         }
         else
         {
-            drive.load()
-                .then(data =>
+            loadDriveData().then((loaded) =>
+            {
+                setLoggedIn(true);
+                if (loaded)
                 {
-                    log('Loaded');
-                    if (data.length > 0)
-                    {
-                        localStorage.setItem(LOCAL_STORAGE_KEY, data);
-                        begin();
-                    } // else, probably first login, so keep the local data
-                    setLoggedIn(true);
-                })
-                .catch(error => log('Error loading data: ' + error));
+                    begin();
+                }
+            });
         }
     });
 }
@@ -202,6 +228,94 @@ logoutButton.addEventListener('click', () =>
     drive.clearSignIn();
     setLoggedIn(false);
 });
+
+const saveButton = document.getElementById('btn-save')!;
+saveButton.addEventListener('click', () =>
+{
+    closeHamburger();
+
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (data)
+    {
+        const blob = new Blob([data], { type: 'application/json' });
+    
+        // Create a link element
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'der-die-das.json';
+    
+        // Append link, trigger click, then remove link
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+});
+
+const loadButton = document.getElementById('btn-load')!;
+loadButton.addEventListener('click', () =>
+{
+    closeHamburger();
+
+    // Create a hidden file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.style.display = 'none';
+    input.onchange = () =>
+    {
+        const file = input.files?.[0];
+        if (!file)
+        {
+            log('No file selected.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () =>
+        {
+            if (typeof reader.result === 'string')
+            {
+                try
+                {
+                    let tempDeck = new Deck(genus!, reader.result);
+                    log('Deck loaded successfully with ' + tempDeck.getNumCards() + ' cards.');
+                    localStorage.setItem(LOCAL_STORAGE_KEY, reader.result);
+                    begin();
+                }
+                catch (e)
+                {
+                    log('Error loading deck');
+                    return;
+                }
+            }
+            else
+            {
+                log('File could not be read as text.');
+            }
+        };
+
+        reader.onerror = () =>
+        {
+            log('Error reading file.');
+        };
+
+        reader.readAsText(file);
+    };
+
+    // Trigger file selection
+    document.body.appendChild(input);
+    input.click();
+
+    // Clean up the input element after use
+    input.addEventListener('click', () =>
+    {
+        setTimeout(() =>
+        {
+            document.body.removeChild(input);
+        }, 0);
+    });
+});
+
 
 function setLoggedIn(loggedIn: boolean)
 {
@@ -232,8 +346,8 @@ statsButton.addEventListener('click', () =>
     closeHamburger();
 
     showPage(statsPage);
-    document.getElementById('stat-numWords')!.textContent = deck.getNumCards().toString();
-    document.getElementById('stat-totalWords')!.textContent = deck.getNumWords().toString();
+    document.getElementById('stat-numWords')!.textContent = deck!.getNumCards().toString();
+    document.getElementById('stat-totalWords')!.textContent = deck!.getNumWords().toString();
 
     if (numAnswers === 0)
     {
@@ -424,9 +538,9 @@ function chooseAnswer(answer: Genus): void
         resultIcon.textContent = 'close';
         resultIcon.style.color = 'red';
     }
-    deck.answer(question.card as Card, correct);
+    deck!.answer(question.card as Card, correct);
 
-    const userData = deck.save();
+    const userData = deck!.save();
     localStorage.setItem(LOCAL_STORAGE_KEY, userData);
     if (drive.isSignedIn())
     {
