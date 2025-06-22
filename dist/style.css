@@ -92,7 +92,7 @@ body {
     top: 1rem;
     right: 1rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: right;
     align-items: right;
 }
@@ -104,7 +104,7 @@ body {
     font-size: 1.5rem;
 }
 
-#hamburgerIcon {
+.menuIcon.material-symbols-outlined {
     font-size: 3rem;
 }
 
@@ -159,12 +159,12 @@ body {
 }
 
 #btn-die {
-    background-color: #E91E63;
+    background-color: #e91e63;
     color: #fff;
 }
 
 #btn-das {
-    background-color: rgb(32, 233, 149);
+    background-color: #20e995;
     color: #fff;
 }
 
