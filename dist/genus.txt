@@ -1015,7 +1015,6 @@ Reform f
 Flug m
 Vorfeld n
 Zitat n
-Türe f
 Presse f
 Auftakt m
 Datei f
@@ -1036,7 +1035,6 @@ Kredit m
 Format n
 Nord m
 Mitteilung f
-Homburg m
 Ausflug m
 Griff m
 Kaiser m
@@ -1220,7 +1218,6 @@ Denken n
 Widerspruch m
 Ressource f
 Vitamin n
-Zwecke f
 Wettkampf m
 Tee m
 Angelegenheit f
@@ -1287,7 +1284,6 @@ Bewerber m
 Löwe m
 Kirchengemeinde f
 Besonderheit f
-Air n
 Bildschirm m
 Provinz f
 Hinblick m
@@ -1999,7 +1995,6 @@ Genre n
 Horn n
 Wirkstoff m
 Bundesverband m
-Derby n
 Beleuchtung f
 Schätzung f
 Ablehnung f
@@ -2052,7 +2047,6 @@ Arbeitsgruppe f
 Behindertenparkplatz m
 Kuh f
 Pilz m
-Köhler m
 Leinwand f
 Nahrung f
 Tomate f
