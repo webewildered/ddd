@@ -147,7 +147,8 @@ body {
     box-shadow: 2px 2px 2px rgb(0, 0, 0, 0.4);
 }
 
-.button-container button:active {
+.button-container button:active,
+.button-container button.active {
     transform: translateY(2px);
     box-shadow: none
 }

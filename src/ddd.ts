@@ -164,6 +164,29 @@ document.getElementById('btn-der')?.addEventListener('click', () => chooseAnswer
 document.getElementById('btn-die')?.addEventListener('click', () => chooseAnswer('f'));
 document.getElementById('btn-das')?.addEventListener('click', () => chooseAnswer('n'));
 
+const keyButtonMap: Record<string, string> = { '1': 'btn-der', '2': 'btn-die', '3': 'btn-das' };
+document.addEventListener('keydown', (e) =>
+{
+    if (e.repeat) return;
+    const btnId = keyButtonMap[e.key];
+    if (!btnId) return;
+    const btn = document.getElementById(btnId) as HTMLButtonElement | null;
+    if (!btn) return;
+    btn.classList.add('active');
+});
+document.addEventListener('keyup', (e) =>
+{
+    const btnId = keyButtonMap[e.key];
+    if (!btnId) return;
+    const btn = document.getElementById(btnId) as HTMLButtonElement | null;
+    if (!btn) return;
+    if (btn.classList.contains('active'))
+    {
+        btn.classList.remove('active');
+        btn.click();
+    }
+});
+
 const splashLoginButton = document.getElementById('btn-splashLogin')!;
 const lateLoginButton = document.getElementById('btn-login')!;
 function loadDriveData()
