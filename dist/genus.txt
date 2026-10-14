@@ -1183,7 +1183,6 @@ Werkzeug n
 Schalk m
 Erhöhung f
 Potenzial n
-Bar n
 Stadtverwaltung f
 Kloster n
 Casino n
@@ -1647,7 +1646,6 @@ Hammer m
 Anfänger m
 Heim n
 Bücherei f
-Elf m
 Tendenz f
 Passagier m
 Zimmermann m
@@ -1667,7 +1665,6 @@ Fernseher m
 Bauch m
 Aufsichtsrat m
 Flügel m
-Regionalliga f
 Outfit n
 Fachkraft f
 Übergang m
@@ -1890,7 +1887,6 @@ Fußballer m
 Match n
 Fach n
 Heizung f
-Viertelfinale n
 Bär m
 Spielerin f
 Pilot m
@@ -1900,8 +1896,6 @@ Bronze f
 Jahresende n
 Mehl n
 Dienstleister m
-Mini m
-Freistaat m
 Absage f
 Dirigent m
 Königin f
